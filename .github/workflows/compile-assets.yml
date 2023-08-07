@@ -1,0 +1,53 @@
+name: Docker Build, Push, and Deploy
+
+on:
+  push:
+    branches:
+      - main  # Change this to the branch you want to trigger the workflow on
+
+jobs:
+  build-push-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login to Docker Hub
+      
+        uses: docker/login-action@v2.1.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Images
+        uses: docker/build-push-action@v4.0.0
+
+        with:
+          context: .
+          push: true
+          tags: docker:v1
+
+          run: docker push ramiahm/docker-react:tagname
+   
+      #   run: |
+      #     # Build and push each container image
+      #     docker build -t your-dockerhub-username/your-image-name1:v1.0.0 .
+      #     docker push ramiahm/docker-react:tagname
+
+
+      #     docker build -t your-dockerhub-username/your-image-name2:v1.0.0 .
+      #     docker push your-dockerhub-username/your-image-name2:v1.0.0
+
+      #     # Add more container images as needed
+
+      # - name: Deploy using Docker Compose
+      #   run: |
+      #     # Navigate to your application's directory containing docker-compose.yml
+      #     cd path/to/your/application
+
+      #     # Start the application using docker-compose
+      #     docker-compose up -d
+
+      # Add more steps as needed for additional deployment tasks or validation
+
+# ////////////////
+
