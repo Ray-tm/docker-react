@@ -1,46 +1,80 @@
 
-name: Deploy to test server
+# name: Deploy to test server
 
-on:
-    push:
-        branches:
-            - main
-    workflow_dispatch:
+# on:
+#     push:
+#         branches:
+#             - main
+#     workflow_dispatch:
 
-jobs:
+# jobs:
 
-    build-frontend-and-push:
-        runs-on: ubuntu-latest
+#     build-frontend-and-push:
+#         runs-on: ubuntu-latest
 
-        steps:
-        - name: Checkout source code
-          uses: actions/checkout@v3
+#         steps:
+#         - name: Checkout source code
+#           uses: actions/checkout@v3
           
-        - name: Docker Login
-          uses: docker/login-action@v2.1.0
-          with:
-            username: ${{ secrets.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_TOKEN }}
+#         - name: Docker Login
+#           uses: docker/login-action@v2.1.0
+#           with:
+#             username: ${{ secrets.DOCKERHUB_USERNAME }}
+#             password: ${{ secrets.DOCKERHUB_TOKEN }}
             
 
-        - name: Build and push Docker images
-          uses: docker/build-push-action@v4.0.0
-          with:
-             context: .
-             push: true
-             tags: ramiahm/docker-react:v1
+#         - name: Build and push Docker images
+#           uses: docker/build-push-action@v4.0.0
+#           with:
+#              context: .
+#              push: true
+#              tags: ramiahm/docker-react:v1
 
-        - name: Generate deployment package
-          run: zip -r deploy.zip . -x '*.git*'
+#         - name: Generate deployment package
+#           run: zip -r deploy.zip . -x '*.git*'
 
-        - name: Deploy to EB
-          uses: einaregilsson/beanstalk-deploy@v21
-          with:
-            aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-            aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
-            application_name: docker-react
-            environment_name: Docker-react-env
-            existing_bucket_name: elasticbeanstalk-us-east-1-000172556371
-            region: us-east-1
-            version_label: ${{ github.sha }}
-            deployment_package: deploy.zip
+#         - name: Deploy to EB
+#           uses: einaregilsson/beanstalk-deploy@v21
+#           with:
+#             aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+#             aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+#             application_name: docker-react
+#             environment_name: Docker-react-env
+#             existing_bucket_name: elasticbeanstalk-us-east-1-000172556371
+#             region: us-east-1
+#             version_label: ${{ github.sha }}
+#             deployment_package: deploy.zip
+
+
+
+
+
+
+name: Deploy main
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout source code
+      uses: actions/checkout@v2
+
+    - name: Generate deployment package
+      run: zip -r deploy.zip . -x '*.git*'
+
+    - name: Deploy to EB
+      uses: einaregilsson/beanstalk-deploy@v21
+      with:
+        aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        application_name: docker-react
+        environment_name: docker-react-env
+        version_label: ${{ github.sha }}
+        existing_bucket_name: elasticbeanstalk-us-east-1-000172556371
+        region: us-east-1
+        deployment_package: deploy.zip
