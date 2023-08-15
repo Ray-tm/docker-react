@@ -31,7 +31,7 @@ jobs:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
           aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
           application_name: docket-triel
-          environment_name: Docker-react-env
+          environment_name: docker-react-env
           existing_bucket_name: elasticbeanstalk-us-east-1-000172556371
           region: us-east-1
           version_label: ${{ github.sha }}
