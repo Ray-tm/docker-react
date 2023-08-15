@@ -1,52 +1,38 @@
-
-name: Deploy to test server
+name: Deploy-frontend-project
 
 on:
-    push:
-        branches:
-            - main
-    workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
 
-    build-frontend-and-push:
-        runs-on: ubuntu-latest
+      - name: Checkout source code
+        uses: actions/checkout@v3
 
-        steps:
-        - name: Checkout source code
-          uses: actions/checkout@v3
-          
-        - name: Docker Login
-          uses: docker/login-action@v2.1.0
-          with:
-            username: ${{ secrets.DOCKERHUB_USERNAME }}
-            password: ${{ secrets.DOCKERHUB_TOKEN }}
-            
+      - name: Docker login
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+        
+      - name: Build Docker Image
+        run: docker build -t ramiahm/docker-react -f Dockerfile.dev .
+        
+      - name: Run tests
+        run: docker run -e CI=true ramiah/docker-react npm test
 
-        - name: Build and push Docker images
-          uses: docker/build-push-action@v4.0.0
-          with:
-             context: .
-             push: true
-             tags: ramiahm/docker-react:v1
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
 
-        - name: Generate deployment package
-          run: zip -r deploy.zip . -x '*.git*'
-
-        - name: Deploy to EB
-          uses: einaregilsson/beanstalk-deploy@v21
-          with:
-            aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
-            aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
-            application_name: docket-triel
-            environment_name: Docket-triel-env
-            existing_bucket_name: elasticbeanstalk-us-east-1-000172556371
-            region: us-east-1
-            version_label: ${{ github.sha }}
-            deployment_package: deploy.zip
-
-
-
-
-
-
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v18
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_KEY }}
+          application_name: docket-triel
+          environment_name: docket-triel-env
+          existing_bucket_name: elasticbeanstalk-us-east-1-000172556371
+          region: us-east-1
+          version_label: ${{ github.sha }}
+          deployment_package: deploy.zip
