@@ -1,0 +1,11 @@
+# Specify the version of Docker Compose
+version: '3'
+
+# Specify types of container (services) that will be created when run 'docker-compose up'
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"

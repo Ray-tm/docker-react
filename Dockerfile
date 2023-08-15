@@ -26,4 +26,4 @@ FROM nginx
 EXPOSE 80
 
 # Copy 'build' folder from the Build Phase to the Nginx container - this will start automatically Nginx
-COPY --from=builder /app/build /usr/share/nginx/html
+COPY --from=builder /app/build /usr/share/nginx/html 
